@@ -15,6 +15,9 @@ trait Conf {
   def getWithDefault[A](conf: ConfNames, default: A)(implicit conv: ConfConverter[A]): A
 }
 
+/** Marker trait for configuration types that should chain `Figi.makeConf` invocations. */
+trait ConfChainer
+
 object Figi {
   //TODO macros do not support default args
   def makeConf[A](
@@ -29,6 +32,10 @@ object Figi {
       val c: con.type = con
       import c.universe._
       
+      def isImplicitlyConfChainer(tpe: Type) = 
+        tpe <:< typeOf[ConfChainer] ||
+        c.inferImplicitView(EmptyTree, tpe, typeOf[ConfChainer]) != EmptyTree
+      
       val tpe = tag.tpe
       
       val impls: Iterable[Tree] = for {
@@ -42,7 +49,10 @@ object Figi {
         t = meth.returnType.asInstanceOf[Type]
       } yield {
     	  val confName = q"$prefix :+ $name"
-    	  val getter = q"$conf.get[$t]($confName)"
+    	  val getter = 
+    	    // creating chaining invocation
+    	    if (isImplicitlyConfChainer(t)) q"makeConf[$t]($conf, $confName)" 
+    	    else q"$conf.get[$t]($confName)"
         if (meth.isStable) { // val
           q"val $termName = $getter"
         } else { // def
@@ -82,6 +92,18 @@ object Figi {
     val b: Double
     def c: List[Int]
     def d(c:Int): Double
+    
+    def baz: Baz
+    def qux: Qux
+    val bar: Bar
   }
+  
+  trait Bar extends ConfChainer {
+    def a: Int
+  }
+  implicit class QuxToConf(q: Qux) extends ConfChainer
+  trait Qux 
+  implicit def bazToConf(baz: Baz) = new ConfChainer {}
+  trait Baz
 
 }
