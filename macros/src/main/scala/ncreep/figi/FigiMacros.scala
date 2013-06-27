@@ -5,11 +5,10 @@ import reflect.macros.Context
 import reflect.api._
 
 
-object Figi {
-  //TODO macros do not support default args
+private[figi] object FigiMacros {
   def makeConf[A](
       conf: Conf, 
-      prefix: ConfNames = Vector()): A = macro makeConfImpl[A]
+      prefix: ConfNames): A = macro makeConfImpl[A]
 
   def makeConfImpl[A](con: Context)(
     conf: con.Expr[Conf],
