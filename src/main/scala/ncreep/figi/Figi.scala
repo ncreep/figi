@@ -3,20 +3,7 @@ package ncreep.figi
 import language.experimental.macros
 import reflect.macros.Context
 import reflect.api._
-import util.Try
-import com.sun.xml.internal.ws.wsdl.writer.document.ParamType
 
-trait ConfConverter[+A] {
-  def apply(conf: Try[ConfValue]): A
-}
-
-trait Conf {
-  def get[A](conf: ConfNames)(implicit conv: ConfConverter[A]): A
-  def getWithDefault[A](conf: ConfNames, default: A)(implicit conv: ConfConverter[A]): A
-}
-
-/** Marker trait for configuration types that should chain `Figi.makeConf` invocations. */
-trait ConfChainer
 
 object Figi {
   //TODO macros do not support default args
@@ -86,6 +73,7 @@ object Figi {
     def getWithDefault[A](conf: ConfNames, default: A)(implicit conv: ConfConverter[A]): A = { println(conf + " - " + default); null.asInstanceOf[A] }
   }
 
+  import util.Try
   implicit object Conv extends ConfConverter[Nothing] { def apply(conf: Try[ConfValue]) = ??? }
   trait Foo {
     def a(): Int
