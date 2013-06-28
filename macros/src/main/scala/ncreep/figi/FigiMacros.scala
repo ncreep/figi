@@ -5,8 +5,7 @@ import reflect.macros.Context
 import reflect.api._
 import ncreep.figi._
 
-
-object FigiMacros {
+private[figi] object FigiMacros {
   def makeConf[A](
       conf: Conf, 
       prefix: ConfNames): A = macro makeConfImpl[A]
@@ -23,9 +22,12 @@ object FigiMacros {
         tpe <:< typeOf[ConfChainer] ||
         c.inferImplicitView(EmptyTree, tpe, typeOf[ConfChainer]) != EmptyTree
         
-      def hasImplicitConverter(tpe: Type): Boolean =  true
-//    def hasImplicitConverter(tpe: Type): Boolean =  {println(c.typeCheck(tq"List[${typeTag[String]}]").tpe); true}
-//    def hasImplicitConverter(tpe: Type): Boolean =  {println(c.typeCheck(TypeDef(Modifiers(), newTypeName("List"), Nil, TypeTree(typeOf[String])))); true}
+    def hasImplicitConverter(tpe: Type): Boolean =  {
+        // applying ConfConverter to tpe
+        val convType = typeOf[ConfConverter[Nothing]] match { case TypeRef(p, s, _) => TypeRef(p, s, List(tpe)) }
+        c.inferImplicitValue(convType) != EmptyTree
+      }
+      
       
       val tpe = tag.tpe
       
@@ -42,12 +44,12 @@ object FigiMacros {
         t = meth.returnType.asInstanceOf[Type]
       } yield {
     	  val (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), hasImplicitConverter(t))
-          if (!isConfChainer && !hasConverter) abort(s"No instance of ${q"ConfConverter[$t]"} found for method $name")
+          if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${q"ncreep.figi.ConfConverter[$t]"} found to convert the result of method $name")
           
     	  val confName = q"$prefix :+ $name"
     	  val getter = 
     	    // creating chaining invocation
-    	    if (isConfChainer) q"makeConf[$t]($conf, $confName)" 
+    	    if (isConfChainer) q"ncreep.figi.FigiMacros.makeConf[$t]($conf, $confName)" 
     	    else q"$conf.get[$t]($confName)"
         if (meth.isStable) { // val
           q"val $termName = $getter"
@@ -72,6 +74,7 @@ object FigiMacros {
       println(impl)//RM
       val res = c.Expr[A](impl)
     }
+    
 
     (new Helper).res
   }
