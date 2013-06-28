@@ -3,9 +3,10 @@ package ncreep.figi
 import language.experimental.macros
 import reflect.macros.Context
 import reflect.api._
+import ncreep.figi._
 
 
-private[figi] object FigiMacros {
+object FigiMacros {
   def makeConf[A](
       conf: Conf, 
       prefix: ConfNames): A = macro makeConfImpl[A]
@@ -18,11 +19,17 @@ private[figi] object FigiMacros {
       val c: con.type = con
       import c.universe._
       
-      def isImplicitlyConfChainer(tpe: Type) = 
+      def isImplicitlyConfChainer(tpe: Type): Boolean = 
         tpe <:< typeOf[ConfChainer] ||
         c.inferImplicitView(EmptyTree, tpe, typeOf[ConfChainer]) != EmptyTree
+        
+      def hasImplicitConverter(tpe: Type): Boolean =  true
+//    def hasImplicitConverter(tpe: Type): Boolean =  {println(c.typeCheck(tq"List[${typeTag[String]}]").tpe); true}
+//    def hasImplicitConverter(tpe: Type): Boolean =  {println(c.typeCheck(TypeDef(Modifiers(), newTypeName("List"), Nil, TypeTree(typeOf[String])))); true}
       
       val tpe = tag.tpe
+      
+      def abort(msg: String) = c.abort(c.enclosingPosition, msg)
       
       val impls: Iterable[Tree] = for {
         mem <- tpe.members
@@ -34,10 +41,13 @@ private[figi] object FigiMacros {
         termName = newTermName(name)
         t = meth.returnType.asInstanceOf[Type]
       } yield {
+    	  val (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), hasImplicitConverter(t))
+          if (!isConfChainer && !hasConverter) abort(s"No instance of ${q"ConfConverter[$t]"} found for method $name")
+          
     	  val confName = q"$prefix :+ $name"
     	  val getter = 
     	    // creating chaining invocation
-    	    if (isImplicitlyConfChainer(t)) q"makeConf[$t]($conf, $confName)" 
+    	    if (isConfChainer) q"makeConf[$t]($conf, $confName)" 
     	    else q"$conf.get[$t]($confName)"
         if (meth.isStable) { // val
           q"val $termName = $getter"
@@ -50,9 +60,9 @@ private[figi] object FigiMacros {
               val argType = arg.typeSignature
               val argName = newTermName("arg")
               if (argType weak_<:< t) q"def $termName($argName: ${arg.typeSignature}) = $conf.getWithDefault[$t]($confName, $argName)"
-              else c.abort(c.enclosingPosition, s"Type mismatch in default configuration argument for method $name, $argType does not (weakly) conform to $t")
+              else abort(s"Type mismatch in default configuration argument for method $name, $argType does not (weakly) conform to $t")
             }
-            case _ => c.abort(c.enclosingPosition, s"Too many arguments in method ${name}")
+            case _ => abort(s"Too many arguments in method ${name}")
           }
         } 
       }
@@ -65,32 +75,4 @@ private[figi] object FigiMacros {
 
     (new Helper).res
   }
-
-  //TODO testing only
-  object Conf extends Conf {
-    def get[A](conf: ConfNames)(implicit conv: ConfConverter[A]): A = { println(conf); null.asInstanceOf[A] }
-    def getWithDefault[A](conf: ConfNames, default: A)(implicit conv: ConfConverter[A]): A = { println(conf + " - " + default); null.asInstanceOf[A] }
-  }
-
-  import util.Try
-  implicit object Conv extends ConfConverter[Nothing] { def apply(conf: Try[ConfValue]) = ??? }
-  trait Foo {
-    def a(): Int
-    val b: Double
-    def c: List[Int]
-    def d(c:Int): Double
-    
-    def baz: Baz
-    def qux: Qux
-    val bar: Bar
-  }
-  
-  trait Bar extends ConfChainer {
-    def a: Int
-  }
-  implicit class QuxToConf(q: Qux) extends ConfChainer
-  trait Qux 
-  implicit def bazToConf(baz: Baz) = new ConfChainer {}
-  trait Baz
-
 }
