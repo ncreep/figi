@@ -5,7 +5,7 @@ import reflect.macros.Context
 import reflect.api._
 import ncreep.figi._
 
-private[figi] object FigiMacros {
+object Figi {
   
   /** Implements a config trait with a given prefix of config values. */
   def makeConfWithPrefix[A](
@@ -24,8 +24,7 @@ private[figi] object FigiMacros {
   }
   
   /** Implements a config trait without using a prefix. */
-  def makeConf[A](
-    cnf: Conf): A = macro makeConfImpl[A]
+  def makeConf[A](cnf: Conf): A = macro makeConfImpl[A]
 
   def makeConfImpl[A](c: Context)(
     cnf: c.Expr[Conf])(implicit t: c.WeakTypeTag[A]): c.Expr[A] = {
@@ -70,12 +69,13 @@ private[figi] object FigiMacros {
       t = meth.returnType.asInstanceOf[Type]
     } yield {
       val (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), hasImplicitConverter(t))
+      //TODO this error should be emitted after checking for too many arguments, as it is irrelevant in that case
       if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${q"ncreep.figi.ConfConverter[$t]"} found to convert the result of method $name")
 
       val confName = q"$prefix :+ $name"
       val getter =
         // creating chaining invocation
-        if (isConfChainer) q"ncreep.figi.FigiMacros.makeConfWithPrefix[$t]($conf, $confName)"
+        if (isConfChainer) q"ncreep.figi.Figi.makeConfWithPrefix[$t]($conf, $confName)"
         else q"$conf.get[$t]($confName)"
       if (meth.isStable) { // val
         q"val $termName = $getter"
@@ -97,7 +97,7 @@ private[figi] object FigiMacros {
 
     val typeName = newTypeName(tpe.typeSymbol.name.encoded)
     val impl = q"new $typeName {..$impls}"
-    println(impl) //RM
+//    println(impl) //RM
     val res = c.Expr[A](impl)
   }
 }
