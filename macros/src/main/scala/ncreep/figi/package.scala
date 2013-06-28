@@ -24,4 +24,6 @@ package object figi {
 
   /** A marker trait for configuration types that should chain `Figi.makeConf` invocations. */
   trait ConfChainer
+  /** Utility value for marker implicit conversions. */
+  object ConfChainer extends ConfChainer
 }

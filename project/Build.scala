@@ -35,8 +35,12 @@ object FigiBuild extends Build {
     "figi-core",
     file("core"),
     settings = buildSettings ++ Seq(
-		libraryDependencies += "org.specs2" %% "specs2" % "2.1-SNAPSHOT" % "test",
-		scalacOptions in Test ++= Seq("-Yrangepos"),
+		libraryDependencies ++= Seq(
+			"org.specs2" %% "specs2" % "2.1-SNAPSHOT" % "test",
+			"junit" % "junit" % "4.7" % "test"
+		),		
+// Doesn't seem to work with macros
+//		scalacOptions in Test ++= Seq("-Yrangepos"),
 		resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
                     	  "releases"  at "http://oss.sonatype.org/content/repositories/releases")
 	)
