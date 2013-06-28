@@ -6,7 +6,8 @@ object BuildSettings {
 	version := "0.1",
     scalaVersion := "2.10.2",
     scalaOrganization := "org.scala-lang",
-    resolvers += Resolver.sonatypeRepo("snapshots")
+    resolvers += Resolver.sonatypeRepo("snapshots"),
+	initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
   )
 }
 
@@ -17,9 +18,9 @@ object FigiBuild extends Build {
     "figi",
     file("."),
     settings = buildSettings
-  ) aggregate(figiMacros, core)
+  ) aggregate(macros, core)
 
-  lazy val figiMacros: Project = Project(
+  lazy val macros: Project = Project(
     "figi-macros",
     file("macros"),
     settings = buildSettings ++ Seq(
@@ -39,5 +40,5 @@ object FigiBuild extends Build {
 		resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
                     	  "releases"  at "http://oss.sonatype.org/content/repositories/releases")
 	)
-  ) dependsOn(figiMacros)
+  ) dependsOn(macros)
 }

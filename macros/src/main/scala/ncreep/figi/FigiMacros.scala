@@ -23,6 +23,7 @@ private[figi] object FigiMacros {
         c.inferImplicitView(EmptyTree, tpe, typeOf[ConfChainer]) != EmptyTree
         
     def hasImplicitConverter(tpe: Type): Boolean =  {
+        // must be a cleaner way to apply a type
         // applying ConfConverter to tpe
         val convType = typeOf[ConfConverter[Nothing]] match { case TypeRef(p, s, _) => TypeRef(p, s, List(tpe)) }
         c.inferImplicitValue(convType) != EmptyTree
