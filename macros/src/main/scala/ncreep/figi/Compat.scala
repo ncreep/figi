@@ -1,3 +1,9 @@
+/**
+ * Quasiquotes compatibility code, taken from:
+ * https://github.com/scalamacros/sbt-example-paradise210
+ * 
+ * TODO update when something more solid is ready.
+ */
 package ncreep.figi
 
 import scala.reflect.api.{Universe => ApiUniverse}
