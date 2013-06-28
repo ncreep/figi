@@ -6,8 +6,8 @@ object BuildSettings {
 	version := "0.1",
     scalaVersion := "2.10.2",
     scalaOrganization := "org.scala-lang",
-    resolvers += Resolver.sonatypeRepo("snapshots"),
-	initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
+    resolvers += Resolver.sonatypeRepo("snapshots")
+	//initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
   )
 }
 
