@@ -72,6 +72,11 @@ class FigiSpecs extends Specification {
       }
     }
     
+    "do nothing when no abstract methods are present" in {
+      trait Foo { def a = 5 }
+       makeConf[Foo](cnf).a mustEqual 5
+    }
+    
     "fail fast on missing val members" in {
       trait Foo { val abc: Int }
       makeConf[Foo](cnf) must throwA[NoSuchElementException]
@@ -102,7 +107,7 @@ class FigiSpecs extends Specification {
       foo.b mustEqual "2"
       foo.a.a must throwA[NoSuchElementException]
       foo.a.c mustEqual 13
-      foo.a.d.a mustEqual 6
+      foo.a.d.a mustEqual 5
       foo.a.d.f must throwA[NoSuchElementException]
       foo.a.d.g mustEqual 12
       foo.a.d.k(15) mustEqual 15
