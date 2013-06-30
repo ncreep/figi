@@ -6,8 +6,20 @@ object BuildSettings {
 	version := "0.1",
     scalaVersion := "2.10.2",
     scalaOrganization := "org.scala-lang",
-    resolvers += Resolver.sonatypeRepo("snapshots")
-	//initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
+	scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature"),
+    resolvers += Resolver.sonatypeRepo("snapshots"),
+	initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
+  )
+  
+  val buildTestSettings = buildSettings ++ Seq(
+	libraryDependencies ++= Seq(
+		"org.specs2" %% "specs2" % "2.1-SNAPSHOT" % "test",
+		"junit" % "junit" % "4.7" % "test"
+	),
+	resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
+	                  "releases"  at "http://oss.sonatype.org/content/repositories/releases")
+// Doesn't seem to work with macros
+//		scalacOptions in Test ++= Seq("-Yrangepos"),
   )
 }
 
@@ -34,15 +46,16 @@ object FigiBuild extends Build {
   lazy val core: Project = Project(
     "figi-core",
     file("core"),
-    settings = buildSettings ++ Seq(
-		libraryDependencies ++= Seq(
-			"org.specs2" %% "specs2" % "2.1-SNAPSHOT" % "test",
-			"junit" % "junit" % "4.7" % "test"
-		),		
-// Doesn't seem to work with macros
-//		scalacOptions in Test ++= Seq("-Yrangepos"),
-		resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
-                    	  "releases"  at "http://oss.sonatype.org/content/repositories/releases")
-	)
+    settings = buildTestSettings
   ) dependsOn(macros)
+  
+  lazy val configrity: Project = Project(
+    "figi-configrity",
+    file("configrity"),
+    settings = buildTestSettings ++ Seq(
+	  libraryDependencies ++= Seq(
+	    "org.streum" %% "configrity-core" % "1.0.0"
+	  )
+	)
+  ) dependsOn(core)
 }

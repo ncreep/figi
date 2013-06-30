@@ -49,12 +49,17 @@ object Figi {
       tpe <:< typeOf[ConfChainer] ||
       hasImplicitValue(typeOf[IsConfChainer[Nothing]], tpe)
 
-      
 //    def hasImplicitConverter(tpe: Type): Boolean = 
 //      hasImplicitValue(typeOf[ConfConverter[Nothing]], tpe)
 
     def abort(msg: String) = c.abort(c.enclosingPosition, msg)
 
+//    println(c.typeCheck(reify{
+//      val x: conf.splice.confTypeClass.CC
+//      x
+//    }).tree)//RM
+  
+    
     val impls: Iterable[Tree] = for {
       mem <- tpe.members
       if mem.isMethod
