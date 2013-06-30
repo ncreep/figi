@@ -1,5 +1,6 @@
 package ncreep
 
+import scala.language.higherKinds
 import util.Try
 
 package object figi {
@@ -7,24 +8,30 @@ package object figi {
   type ConfNames = Vector[String]
   type ConfValue = String
 
-  /** Converter between configuration names and configuration values. */
-  trait ConfConverter[+A] {
-    def apply(conf: Try[ConfValue]): A
-  }
-
-  /** And abstraction for a configuration data type. */
-  trait Conf {
-    /** @return The value that corresponds to the give configuration key. */
-    def get[A](conf: ConfNames)(implicit conv: ConfConverter[A]): A
+  /** A type class for a configuration data type. 
+   * @tparam C The type of configuration being used.
+   * @tparam CC A type for the configuration converter: ConfValue => A  
+   */
+  trait Conf[C, Self <: Conf[C, _]] {
+    type CC[A]
+    
+    /** @return The value that corresponds to the given configuration key. */
+    def get[A](conf: C, confNames: ConfNames)(implicit conv: Self#CC[A]): A
+    
     /** 
-     *  @return The value that corresponds to the give configuration key, or the default in case the key is missing. 
+     *  @return The value that corresponds to the given configuration key, or the default in case the key is missing. 
      */
-    def getWithDefault[A](conf: ConfNames, default: A)(implicit conv: ConfConverter[A]): A
+    def getWithDefault[A](conf: C, confNames: ConfNames, default: A)(implicit conv: Self#CC[A]): A
   }
-
+  
+  /** Binds configuration values to their corresponding typeclass. 
+   *  Thus avoiding type parameterization on methods the use them. 
+   */
+  implicit class InstanceWithConf[C](val config: C)(implicit val confTypeClass: T forSome {type T <: Conf[C, T]})
+  
   /** A marker trait for configuration types that should chain `Figi.makeConf` invocations. */
   trait ConfChainer
   
-  /** A marker type class for configuration types that should chain `Figi.makeConf` invocations. */
-  trait IsConfChainer[+T]
+  /** A marker typeclass for configuration types that should chain `Figi.makeConf` invocations. */
+  trait IsConfChainer[+A]
 }
