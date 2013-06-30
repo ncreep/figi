@@ -16,7 +16,7 @@ object FigiTemp {
   //TODO testing only
   trait Conv[+A] 
   implicit object Conv extends Conv[Nothing] 
-  implicit object Conv2 extends Conv[Int] 
+//  implicit object Conv2 extends Conv[Int] 
   
   trait Config {
     def get[A](conf: ConfNames)(implicit conv: Conv[A]): A = { println(conf); null.asInstanceOf[A] }
@@ -28,7 +28,6 @@ object FigiTemp {
 //	  type CC[A] = Conv[A]
 //  }
 //  
-//  implicitly[Conv[String] =:= PartConf#CC[String]]
   
   trait ConfConf extends Conf[Config, ConfConf] {
     type CC[A] = Conv[A]
@@ -39,18 +38,19 @@ object FigiTemp {
   implicit val confConf = new ConfConf {}
   
   val inst = new InstanceWithConf(Con: Config)(confConf)
+  implicitly[Conv[String] =:= ConfConf#CC[String]]
   
   def makeConf = Figi.makeConf[Foo](inst)
 
   trait Foo {
     def a(): Int
-//    val b: Double
-//    def c: List[Int]
-//    def d(c: Int): Double
-//
-//    def baz: Baz
-//    def qux: Qux
-//    val bar: Bar
+    val b: Double
+    def c: List[Int]
+    def d(c: Int): Double
+
+    def baz: Baz
+    def qux: Qux
+    val bar: Bar
   }
 
   import scala.language.implicitConversions

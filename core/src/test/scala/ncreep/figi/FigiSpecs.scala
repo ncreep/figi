@@ -9,18 +9,27 @@ import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class FigiSpecs extends Specification {
-  implicit object strConv extends ConfConverter[String] { def apply(conf: Try[ConfValue]) = conf.get }
-  implicit object intConv extends ConfConverter[Int] { def apply(conf: Try[ConfValue]) = Integer.parseInt(conf.get) }
+  
+  trait Conv[A] { def apply(c: ConfValue): A }
+  implicit object strConv extends Conv[String] { def apply(conf: ConfValue) = conf }
+  implicit object intConv extends Conv[Int] { def apply(conf: ConfValue) = Integer.parseInt(conf) }
 
-  object cnf extends Conf {
-    val vals = Map[String, String](
+  type MapSS = Map[String, String]
+  trait MapConf extends Conf[MapSS, MapConf] {
+    type CC[A] = Conv[A]
+    
+    def mkStr(confNames: ConfNames) = confNames mkString "."
+    def get[A](conf: MapSS, confNames: ConfNames)(implicit conv: Conv[A]): A = conv(conf(mkStr(confNames)))
+    def getWithDefault[A](conf: MapSS, confNames: ConfNames, default: A)(implicit conv: Conv[A]): A = 
+      conf.get(mkStr(confNames)).map(conv.apply _).getOrElse(default)
+  }
+  implicit val mapConf = new MapConf { }
+  implicit def toConf(m: MapSS): InstanceWithConf[MapSS, MapConf] = new InstanceWithConf(m)(mapConf: MapConf)
+  
+  val cnf = Map[String, String](
       "a" -> "1", "b" -> "2",
       "c" -> "3", "a.b" -> "4", 
       "a.d.a" -> "5", "a.d.h" -> "6")
-    def get[A](conf: ConfNames)(implicit conv: ConfConverter[A]) = conv(Try(vals(conf.mkString("."))))
-    def getWithDefault[A](conf: ConfNames, default: A)(implicit conv: ConfConverter[A]) =
-      Try(get[A](conf)).getOrElse(default)
-  }
 
   "The figi macro" should {
     "support" >> {

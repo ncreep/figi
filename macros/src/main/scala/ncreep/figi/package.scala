@@ -11,8 +11,11 @@ package object figi {
   /** A type class for a configuration data type. 
    * @tparam C The type of configuration being used.
    * @tparam CC A type for the configuration converter: ConfValue => A  
+   * @tparam Self The type of self, to help the compiler cope... (this should 
+   * provide a stable value of the type `CC`. Note that this
+   * is cyclic, so no way to define `object`s directly inheriting this thing).
    */
-  trait Conf[C, Self <: Conf[C, _]] {
+  trait Conf[C, Self <: Conf[C, Self]] {
     type CC[A]
     
     /** @return The value that corresponds to the given configuration key. */
@@ -27,7 +30,12 @@ package object figi {
   /** Binds configuration values to their corresponding typeclass. 
    *  Thus avoiding type parameterization on methods the use them. 
    */
-  implicit class InstanceWithConf[C](val config: C)(implicit val confTypeClass: T forSome {type T <: Conf[C, T]})
+  implicit class InstanceWithConf[C, CC <: Conf[C, CC]](val config: C)(implicit val confTypeClass: CC)
+  
+  //TODO figure out how to make this global conversion work
+//  import scala.language.implicitConversions
+//  implicit def tooInstanceWithConf[C, CC <: Conf[C, CC]](config: C)(implicit confTypeClass: CC): InstanceWithConf[C, CC] = 
+//    new InstanceWithConf[C, CC](config)
   
   /** A marker trait for configuration types that should chain `Figi.makeConf` invocations. */
   trait ConfChainer

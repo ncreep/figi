@@ -10,25 +10,25 @@ import ncreep.figi._
 object Figi {
 
   /** Implements a config trait of the given type. */
-  def makeConf[A](cnf: InstanceWithConf[_]): A = macro Macros.makeConfImpl[A]
+  def makeConf[A](cnf: InstanceWithConf[_, _ <: Conf[_, _]]): A = macro Macros.makeConfImpl[A]
 
   /** Wrapper object for macros to be hidden from the API.
    *  Using this, as macro methods cannot be marked `private`.
    */
   private[figi] object Macros {
-    def makeConfImpl[A](c: Context)(cnf: c.Expr[InstanceWithConf[_]])
+    def makeConfImpl[A](c: Context)(cnf: c.Expr[InstanceWithConf[_, _ <: Conf[_, _]]])
       (implicit tag: c.WeakTypeTag[A]): c.Expr[A] = {
       new Helper[c.type](c) {
         def tpe = tag.tpe
         def conf = cnf
-        def prefix = c.universe.reify(collection.immutable.Vector())
+        def prefix = c.universe.reify(Vector())
       }.res
     }
   }
 
   private abstract class Helper[C <: Context](val c: C) extends QuasiquoteCompat { helper =>
     def tpe: c.Type // The type of the trait being implemented
-    def conf: c.Expr[InstanceWithConf[_]]
+    def conf: c.Expr[InstanceWithConf[_, _ <: Conf[_, _]]]
     def prefix: c.Expr[ConfNames]
     
     import c.universe._
@@ -49,6 +49,7 @@ object Figi {
       tpe <:< typeOf[ConfChainer] ||
       hasImplicitValue(typeOf[IsConfChainer[Nothing]], tpe)
 
+      
 //    def hasImplicitConverter(tpe: Type): Boolean = 
 //      hasImplicitValue(typeOf[ConfConverter[Nothing]], tpe)
 
@@ -66,10 +67,8 @@ object Figi {
     } yield {
       val (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), true)//(isImplicitlyConfChainer(t), hasImplicitConverter(t)) //TODO
       //TODO this error should be emitted after checking for too many arguments, as it is irrelevant in that case
-      //TODO
-      if (!isConfChainer && !hasConverter) ??? //abort(s"No implicit instance of ${q"ncreep.figi.ConfConverter[$t]"} found to convert the result of method $name")
+      if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${tq"$conf.splice.confTypeClass.CC"} found to convert the result of method $name")
       val confName = q"$prefix :+ $name"
-//      val confName = q"Vector($name)"//RM
       val getter: Tree =
         // creating chaining invocation
         if (isConfChainer) {
@@ -103,7 +102,7 @@ object Figi {
 
     val typeName = newTypeName(tpe.typeSymbol.name.encoded)
     val impl = q"new $typeName {..$impls}"
-    println(impl) //RM
+//    println(impl) //RM
     val res = c.Expr(impl)
   }
 }
