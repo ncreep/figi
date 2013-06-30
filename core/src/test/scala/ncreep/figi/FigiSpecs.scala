@@ -55,6 +55,9 @@ class FigiSpecs extends Specification {
 
         trait Bar { def baz(d: String): String }
         makeConf[Bar](cnf).baz("boo") mustEqual "boo"
+        
+        trait Qux { def qux(d: String = "brr"): String }
+        makeConf[Qux](cnf).qux() mustEqual "brr"
       }
 
       s"chaining for subclasses of ${classOf[ConfChainer].getSimpleName}" in {
