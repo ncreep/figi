@@ -24,7 +24,8 @@ class FigiSpecs extends Specification {
       conf.get(mkStr(confNames)).map(conv.apply _).getOrElse(default)
   }
   implicit val mapConf = new MapConf { }
-  implicit def toConf(m: MapSS): InstanceWithConf[MapSS, MapConf] = new InstanceWithConf(m)(mapConf: MapConf)
+  implicit def toConf(m: MapSS): InstanceWithConf[MapSS, MapConf] = 
+    new InstanceWithConf(m)(mapConf)
   
   val cnf = Map[String, String](
       "a" -> "1", "b" -> "2",
@@ -136,9 +137,9 @@ class FigiSpecs extends Specification {
 //    	  trait Foo { def a(foo: Int): String }
 //    	  makeConf[Foo](cnf) mustEqual ???
 //      }
-//      
+//      //TODO this test gives a cryptic compilation error
 //      "an implicit converter is missing" in {
-//        trait Foo { def a: Int }
+//        trait Foo { def a: Any }
 //        makeConf[Foo](cnf)  mustEqual ???
 //      }
 //    }
