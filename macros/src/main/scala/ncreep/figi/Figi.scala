@@ -33,16 +33,24 @@ object Figi {
     
     import c.universe._
     
+    /** Applies `tp1` as a type constructor to `tp2` produce a `Type` instance (`tp1[tp2]`).
+     * `tp1` is assumed to be applied to `Nothing` at this stage. 
+     */
+    def applyType(tp1: Type, tp2: Type): Type = {
+      // must be a cleaner way to apply a type
+      val appliedType = tp1 match { case TypeRef(p, s, _) => TypeRef(p, s, List(tp2)) }
+      appliedType
+    }
+    
+    /** @return true if the an implicit instance of tp1[tp2] is in scope. */
+    def hasImplicitValue(tp1: Type, tp2: Type) = c.inferImplicitValue(applyType(tp1, tp2)) != EmptyTree
+    
     def isImplicitlyConfChainer(tpe: Type): Boolean =
       tpe <:< typeOf[ConfChainer] ||
-        c.inferImplicitView(EmptyTree, tpe, typeOf[ConfChainer]) != EmptyTree
+      hasImplicitValue(typeOf[IsConfChainer[Nothing]], tpe)
 
-    def hasImplicitConverter(tpe: Type): Boolean = {
-      // applying ConfConverter to tpe
-      // must be a cleaner way to apply a type
-      val convType = typeOf[ConfConverter[Nothing]] match { case TypeRef(p, s, _) => TypeRef(p, s, List(tpe)) }
-      c.inferImplicitValue(convType) != EmptyTree
-    }
+    def hasImplicitConverter(tpe: Type): Boolean = 
+      hasImplicitValue(typeOf[ConfConverter[Nothing]], tpe)
 
     def abort(msg: String) = c.abort(c.enclosingPosition, msg)
 
@@ -60,7 +68,7 @@ object Figi {
       //TODO this error should be emitted after checking for too many arguments, as it is irrelevant in that case
       if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${q"ncreep.figi.ConfConverter[$t]"} found to convert the result of method $name")
       val confName = q"$prefix :+ $name"
-      val getter =
+      val getter: Tree =
         // creating chaining invocation
         if (isConfChainer) {
           // generating inner invocation on the fly, this way there's no need 

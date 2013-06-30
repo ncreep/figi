@@ -6,7 +6,6 @@ import Figi._
 import org.specs2.mutable._
 import org.junit.runner._
 import org.specs2.runner.JUnitRunner
-import languageFeature.implicitConversions
 
 @RunWith(classOf[JUnitRunner])
 class FigiSpecs extends Specification {
@@ -55,10 +54,10 @@ class FigiSpecs extends Specification {
         makeConf[Foo](cnf).a.b mustEqual "4"
       }
 
-      s"chaining for values implicitly convertible to ${classOf[ConfChainer].getSimpleName}" in {
+      s"chaining for values instances of the typeclass ${classOf[IsConfChainer[_]].getSimpleName}" in {
         trait Foo { def a: Bar }
         trait Bar { def b: String }
-        implicit def toConfChainer(b: Bar) = ConfChainer
+        implicit object barConfChainer extends IsConfChainer[Bar]
 
         makeConf[Foo](cnf).a.b mustEqual "4"
       }
@@ -96,11 +95,11 @@ class FigiSpecs extends Specification {
        foo.c mustEqual "f"
     }
     
-    "all together now" in {
+    "all together now..." in {
       trait Foo { def a: Bar; val b: String}
       trait Bar extends ConfChainer { def a(): Int; val c = 13; def d: Baz}
       trait Baz {val a: Int; def f: String; val g = 12; def h(d: String): String; def k(d: Int): Int}
-      implicit def toConfChainer(b: Baz) = ConfChainer
+      implicit object bazConfChainer extends IsConfChainer[Baz]
       
       val foo = makeConf[Foo](cnf)
       
