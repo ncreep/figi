@@ -1,6 +1,5 @@
 package ncreep.figi.configrity
 
-import util.Try
 import ncreep.figi._
 import Figi._
 import org.specs2.mutable._
@@ -13,14 +12,14 @@ import ncreep.figi.configrity._
 class ConfigritiyAdapterSpecs extends Specification {
 
   val data = Map(
-      "a" -> "1", "b" -> "foo", "e" -> "2", "f" -> "3", "g" -> "4",
-      "c" -> "false", "d" -> "[1, 2, 3, 4]", "h" -> "5", "i" -> "6",
-      "file" -> "/some/folder/")
+    "a" -> "1", "b" -> "foo", "e" -> "2", "f" -> "3", "g" -> "4",
+    "c" -> "false", "d" -> "[1, 2, 3, 4]", "h" -> "5", "i" -> "6",
+    "file" -> "/some/folder/")
   val cnf = Configuration(data)
 
   "The figi configrity adapter" should {
     "fetch" >> {
-      
+
       "numbers" in {
         trait Foo1 { val a: Byte }
         makeConf[Foo1](cnf).a mustEqual (1: Byte)
@@ -35,31 +34,41 @@ class ConfigritiyAdapterSpecs extends Specification {
         trait Foo6 { val i: Double }
         makeConf[Foo6](cnf).i mustEqual 6D
       }
-      
+
       "strings" in {
         trait Foo { val b: String }
         makeConf[Foo](cnf).b mustEqual "foo"
       }
-      
+
       "booleans" in {
-    	  trait Foo { val c: Boolean }
-    	  makeConf[Foo](cnf).c mustEqual false
+        trait Foo { val c: Boolean }
+        makeConf[Foo](cnf).c mustEqual false
       }
-      
+
       "lists" in {
-    	  trait Foo { val d: List[Int] }
-    	  makeConf[Foo](cnf).d mustEqual List(1, 2, 3, 4)
+        trait Foo { val d: List[Int] }
+        makeConf[Foo](cnf).d mustEqual List(1, 2, 3, 4)
       }
     }
-    
+
     "honor other implicit conversions in scope" in {
       import java.io.File
       import org.streum.configrity.converter.Extra._
-      
-       trait Foo { def file: File }
-       makeConf[Foo](cnf).file mustEqual new File("/some/folder/")
+
+      trait Foo { def file: File }
+      makeConf[Foo](cnf).file mustEqual new File("/some/folder/")
+    }
+
+    "throw an exception for a missing key" in {
+      trait Foo { def missing: Int }
+      makeConf[Foo](cnf).missing must throwA[NoSuchElementException]
+    }
+
+    "honor default values" in {
+      trait Foo { def missing(d: Int = 3): Int }
+      val foo = makeConf[Foo](cnf)
+      foo.missing() mustEqual 3
+      foo.missing(15) mustEqual 15
     }
   }
-  
-  // missing, default values, Option
 }

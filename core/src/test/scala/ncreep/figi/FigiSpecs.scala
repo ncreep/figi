@@ -1,6 +1,5 @@
 package ncreep.figi
 
-import util.Try
 import ncreep.figi._
 import Figi._
 import org.specs2.mutable._
