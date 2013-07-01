@@ -30,7 +30,7 @@ object FigiBuild extends Build {
     "figi",
     file("."),
     settings = buildSettings
-  ) aggregate(macros, core)
+  ) aggregate(macros, core, configrity)
 
   lazy val macros: Project = Project(
     "figi-macros",
