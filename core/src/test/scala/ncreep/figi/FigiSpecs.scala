@@ -67,7 +67,7 @@ class FigiSpecs extends Specification {
         makeConf[Foo](cnf).a.b mustEqual "4"
       }
 
-      s"chaining for values instances of the typeclass ${classOf[IsConfChainer[_]].getSimpleName}" in {
+      s"chaining for types that are instances of the typeclass ${classOf[IsConfChainer[_]].getSimpleName}" in {
         trait Foo { def a: Bar }
         trait Bar { def b: String }
         implicit object barConfChainer extends IsConfChainer[Bar]

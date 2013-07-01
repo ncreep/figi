@@ -23,7 +23,7 @@ class ConfigrityAdapterExampleSpecs extends Specification {
         val user: String
         val pass: Int
         def port(default: Int = 80): Int
-        def missing: Int // using a val here will fail fast when discovering the missing key
+        def missing: Int // using a val here will fail fast when generating a setup instance
         val dev: Flags
         val prod: Flags
       }
