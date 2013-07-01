@@ -2,7 +2,7 @@
 
 Figi is a small macro based utility for Scala 2.10 that allows you to easily create simple type safe wrappers for configuration objects.
 
-Currently, Figi comes with built in support for the [Configrity](https://github.com/paradigmatic/Configrity) library.
+Currently, Figi comes with built-in support for the [Configrity](https://github.com/paradigmatic/Configrity) library.
 
 Figi relies on [Macro Paradise for 2.10](http://docs.scala-lang.org/overviews/macros/paradise.html#macro_paradise_for_210x) for its macro implementation.
 
@@ -47,7 +47,7 @@ And we can continue using our `Setup` instance as usual.
 - Code generation ignores any non abstract methods
 - Default values for missing keys
 - Chaining configuration traits (see example)
-- Easily extend support for your favorite configuration library (example [here](https://github.com/ncreep/figi/blob/master/configrity/src/main/scala/ncreep/figi/configrity/package.scala))
+- Easily extend support for your favorite configuration library using the typeclass pattern (example [here](https://github.com/ncreep/figi/blob/master/configrity/src/main/scala/ncreep/figi/configrity/package.scala))
 - Support for arbitrary converters provided by the configuration library
 - Support for [Configrity](https://github.com/paradigmatic/Configrity) out of the box
 
