@@ -40,7 +40,7 @@ object FigiTemp {
   val inst = new InstanceWithConf(Con: Config)(confConf)
   implicitly[Conv[String] =:= ConfConf#CC[String]]
   
-//  def makeConf = Figi.makeConf[Foo](inst)
+  def makeConf = Figi.makeConf[Foo](inst)
 
   trait Foo {
     def a(): Int

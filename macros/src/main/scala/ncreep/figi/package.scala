@@ -9,8 +9,11 @@ package object figi {
   type ConfValue = String
 
   /** A type class for a configuration data type. 
+   *  
+   *  See an implementation example in [[ncreep.figi.FigiSpecs]].
+   *  
    * @tparam C The type of configuration being used.
-   * @tparam CC A type for the configuration converter: ConfValue => A  
+   * @tparam CC A type for the configuration converter, typically: ConfValue => A  
    * @tparam Self The type of self, to help the compiler cope... (this should 
    * provide a stable value of the type `CC`. Note that this
    * is cyclic, so no way to define `object`s directly inheriting this thing).

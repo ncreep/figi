@@ -6,7 +6,18 @@ import reflect.api._
 import ncreep.figi._
 
 /** Use [[Figi.makeConf]] to produce configuration instances.
- *  TODO example
+ *  
+ *  Assuming proper implicits in scope:
+ *  ```
+ *  trait Foo { def a: Int; val b: String }
+ *  val config = getConfig ...
+ *  val foo: Foo = Figi.makeConf[Foo](config)
+ *  
+ *  println(foo.a)
+ *  println(foo.b)
+ *  ```
+ *  
+ *  More examples in [[ncreep.figi.FigiSpecs]]
  */
 object Figi {
 
@@ -52,16 +63,11 @@ object Figi {
         hasImplicitValue(typeOf[IsConfChainer[Nothing]], tpe)
 
     // ugly hack to get the type currently used as a converter, there must be a better way...
-    // using intermediate val cnf to ensure that we are using a stable identifier is used to obtain the type
+    // using intermediate 'val cnf' to ensure that a stable identifier is used to obtain the type (no idea why does it break a times)
     val converterType = c.typeCheck(q"{ val cnf = $conf; ???.asInstanceOf[cnf.confTypeClass.CC[Nothing]] }").tpe
     def hasImplicitConverter(tpe: Type): Boolean = hasImplicitValue(converterType, tpe)
 
     def abort(msg: String) = c.abort(c.enclosingPosition, msg)
-
-    //    println(c.typeCheck(reify{
-    //      val x: conf.splice.confTypeClass.CC
-    //      x
-    //    }).tree)//RM
 
     val impls: Iterable[Tree] = for {
       mem <- tpe.members
@@ -109,7 +115,7 @@ object Figi {
 
     val typeName = newTypeName(tpe.typeSymbol.name.encoded)
     val impl = q"new $typeName {..$impls}"
-    //    println(impl) //RM
+    //    println(impl) //TODO remove
     val res = c.Expr(impl)
   }
 }
