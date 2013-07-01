@@ -26,6 +26,7 @@ class ConfigrityAdapterExampleSpecs extends Specification {
         def missing: Int // using a val here will fail fast when generating a setup instance
         val dev: Flags
         val prod: Flags
+        def upCaseUser = user.toUpperCase // will not be overridden by the macro
       }
 
       trait Flags {
@@ -54,6 +55,7 @@ class ConfigrityAdapterExampleSpecs extends Specification {
       setup.dev.root mustEqual new File("/dev/root")
       setup.prod.log mustEqual false
       setup.prod.root mustEqual new File("/prod/root")
+      setup.upCaseUser mustEqual "FIGI"
     }
   }
 }
