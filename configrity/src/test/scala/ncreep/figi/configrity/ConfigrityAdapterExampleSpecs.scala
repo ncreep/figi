@@ -43,7 +43,7 @@ class ConfigrityAdapterExampleSpecs extends Specification {
       
       val cnf = base.attach("dev", dev).attach("prod", prod)
       
-      // populating the fields of a Setup instance from cnf
+      // populating the members of a Setup instance from cnf
       val setup = Figi.makeConf[Setup](cnf)
       
       setup.user mustEqual "figi"
