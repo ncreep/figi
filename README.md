@@ -36,7 +36,7 @@ val setup = new Setup {
 
 Figi saves you the trouble of manually writing this boilerplate, and generates the code using a `def` macro, like so:
 ```scala
-val config = // read config from a file or something
+val config = ...// read config from a file or something
 val setup = Figi.makeConf[Setup]
 ```
 And we can continue using our `Setup` instance as usual.
