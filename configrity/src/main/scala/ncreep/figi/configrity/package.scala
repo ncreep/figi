@@ -16,7 +16,7 @@ package object configrity {
      conf[A](mkStr(confNames), default)
   }
   
-  implicit val configrity = new ConfigrityAdapter { }
+  implicit val configrity = new ConfigrityAdapter {}
   
   import scala.language.implicitConversions
   implicit def toConf(c: Configuration): InstanceWithConf[Configuration, ConfigrityAdapter] = 

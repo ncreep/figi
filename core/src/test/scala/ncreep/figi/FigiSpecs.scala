@@ -34,7 +34,8 @@ class FigiSpecs extends Specification {
 
   "The figi macro" should {
     "support" >> {
-      "support plain vals" in {
+      
+      "plain vals" in {
         trait Foo { val a: String }
         makeConf[Foo](cnf).a mustEqual "1"
       }
@@ -129,23 +130,25 @@ class FigiSpecs extends Specification {
   }
 
 /* Tests that shouldn't compile: */
-//  "The figi macro " should {
-//    "fail to compile when" >> {
-//      "methods have more than a single arguments" in {
-//        trait Foo { def a(foo: String, bar: Int): String }
-//        makeConf[Foo](cnf) mustEqual ???
-//      }
-//      
-//      "a method's argument does not match the return type" in {
-//    	  trait Foo { def a(foo: Int): String }
-//    	  makeConf[Foo](cnf) mustEqual ???
-//      }
-//      //TODO this test gives a cryptic compilation error
-//      "an implicit converter is missing" in {
-//        trait Foo { def a: Any }
-//        makeConf[Foo](cnf)  mustEqual ???
-//      }
-//    }
-//  }
-
+/*
+  "The figi macro " should {
+    "fail to compile when" >> {
+    
+      "methods have more than a single arguments" in {
+        trait Foo { def a(foo: String, bar: Int): String }
+        makeConf[Foo](cnf) mustEqual ???
+      }
+      
+      "a method's argument does not match the return type" in {
+    	  trait Foo { def a(foo: Int): String }
+    	  makeConf[Foo](cnf) mustEqual ???
+      }
+      
+      "an implicit converter is missing" in {
+        trait Foo { def a: Double }
+        makeConf[Foo](cnf)  mustEqual ???
+      }
+    }
+  }
+*/
 }

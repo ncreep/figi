@@ -20,6 +20,7 @@ class ConfigritiyAdapterSpecs extends Specification {
 
   "The figi configrity adapter" should {
     "fetch" >> {
+      
       "numbers" in {
         trait Foo1 { val a: Byte }
         makeConf[Foo1](cnf).a mustEqual (1: Byte)

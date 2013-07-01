@@ -6,7 +6,8 @@ import reflect.api._
 import ncreep.figi._
 
 /** Use [[Figi.makeConf]] to produce configuration instances.
- *  TODO example */
+ *  TODO example
+ */
 object Figi {
 
   /** Implements a config trait of the given type. */
@@ -16,12 +17,13 @@ object Figi {
    *  Using this, as macro methods cannot be marked `private`.
    */
   private[figi] object Macros {
-    def makeConfImpl[A](c: Context)(cnf: c.Expr[InstanceWithConf[_, _ <: Conf[_, _]]])
-      (implicit tag: c.WeakTypeTag[A]): c.Expr[A] = {
+    def makeConfImpl[A](c: Context)(cnf: c.Expr[InstanceWithConf[_, _ <: Conf[_, _]]])(implicit tag: c.WeakTypeTag[A]): c.Expr[A] = {
       new Helper[c.type](c) {
         def tpe = tag.tpe
         def conf = cnf
-        def prefix = c.universe.reify(Vector())
+        // when writing just Vector() the macro misbehaves when not finding implicit
+        // converters, go figure...
+        def prefix = c.universe.reify(collection.immutable.Vector())
       }.res
     }
   }
@@ -30,36 +32,37 @@ object Figi {
     def tpe: c.Type // The type of the trait being implemented
     def conf: c.Expr[InstanceWithConf[_, _ <: Conf[_, _]]]
     def prefix: c.Expr[ConfNames]
-    
+
     import c.universe._
-    
+
     /** Applies `tp1` as a type constructor to `tp2` produce a `Type` instance (`tp1[tp2]`).
-     * `tp1` is assumed to be applied to `Nothing` at this stage. 
+     *  `tp1` is assumed to be applied to `Nothing` at this stage.
      */
     def applyType(tp1: Type, tp2: Type): Type = {
       // must be a cleaner way to apply a type
       val appliedType = tp1 match { case TypeRef(p, s, _) => TypeRef(p, s, List(tp2)) }
       appliedType
     }
-    
+
     /** @return true if the an implicit instance of tp1[tp2] is in scope. */
     def hasImplicitValue(tp1: Type, tp2: Type) = c.inferImplicitValue(applyType(tp1, tp2)) != EmptyTree
-    
+
     def isImplicitlyConfChainer(tpe: Type): Boolean =
       tpe <:< typeOf[ConfChainer] ||
-      hasImplicitValue(typeOf[IsConfChainer[Nothing]], tpe)
+        hasImplicitValue(typeOf[IsConfChainer[Nothing]], tpe)
 
-//    def hasImplicitConverter(tpe: Type): Boolean = 
-//      hasImplicitValue(typeOf[ConfConverter[Nothing]], tpe)
+    // ugly hack to get the type currently used as a converter, there must be a better way...
+    // using intermediate val cnf to ensure that we are using a stable identifier is used to obtain the type
+    val converterType = c.typeCheck(q"{ val cnf = $conf; ???.asInstanceOf[cnf.confTypeClass.CC[Nothing]] }").tpe
+    def hasImplicitConverter(tpe: Type): Boolean = hasImplicitValue(converterType, tpe)
 
     def abort(msg: String) = c.abort(c.enclosingPosition, msg)
 
-//    println(c.typeCheck(reify{
-//      val x: conf.splice.confTypeClass.CC
-//      x
-//    }).tree)//RM
-  
-    
+    //    println(c.typeCheck(reify{
+    //      val x: conf.splice.confTypeClass.CC
+    //      x
+    //    }).tree)//RM
+
     val impls: Iterable[Tree] = for {
       mem <- tpe.members
       if mem.isMethod
@@ -70,9 +73,9 @@ object Figi {
       termName = newTermName(name)
       t = meth.returnType.asInstanceOf[Type]
     } yield {
-      val (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), true)//(isImplicitlyConfChainer(t), hasImplicitConverter(t)) //TODO
-      //TODO this error should be emitted after checking for too many arguments, as it is irrelevant in that case
-      if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${tq"$conf.splice.confTypeClass.CC"} found to convert the result of method $name")
+      val (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), hasImplicitConverter(t))
+      //TODO this error should be emitted after checking for too many arguments, as it may be irrelevant in that case
+      if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${q"${applyType(converterType, t).normalize}"} found to convert the result of method $name")
       val confName = q"$prefix :+ $name"
       val getter: Tree =
         // creating chaining invocation
@@ -84,8 +87,7 @@ object Figi {
             def conf = helper.conf
             def prefix = c.Expr(confName)
           }.res.tree
-        }
-        else q"$conf.confTypeClass.get[$t]($conf.config, $confName)"
+        } else q"$conf.confTypeClass.get[$t]($conf.config, $confName)"
       if (meth.isStable) { // val
         q"val $termName = $getter"
       } else { // def
@@ -96,7 +98,7 @@ object Figi {
           case MethodType(arg :: Nil, _) => {
             val argType = arg.typeSignature
             val argName = newTermName("arg")
-            if (argType weak_<:< t) 
+            if (argType weak_<:< t)
               q"def $termName($argName: ${arg.typeSignature}) = $conf.confTypeClass.getWithDefault[$t]($conf.config, $confName, $argName)"
             else abort(s"Type mismatch in default configuration argument for method $name, $argType does not (weakly) conform to $t")
           }
@@ -107,7 +109,7 @@ object Figi {
 
     val typeName = newTypeName(tpe.typeSymbol.name.encoded)
     val impl = q"new $typeName {..$impls}"
-//    println(impl) //RM
+    //    println(impl) //RM
     val res = c.Expr(impl)
   }
 }
