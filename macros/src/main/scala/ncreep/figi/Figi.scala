@@ -55,8 +55,10 @@ object Figi {
       appliedType
     }
 
+    /** @return true if the an implicit instance of tpe is in scope. */
+    def hasImplicitValue(tpe: Type): Boolean = c.inferImplicitValue(tpe) != EmptyTree
     /** @return true if the an implicit instance of tp1[tp2] is in scope. */
-    def hasImplicitValue(tp1: Type, tp2: Type) = c.inferImplicitValue(applyType(tp1, tp2)) != EmptyTree
+    def hasImplicitValue(tp1: Type, tp2: Type): Boolean = hasImplicitValue(applyType(tp1, tp2))
 
     def isImplicitlyConfChainer(tpe: Type): Boolean =
       tpe <:< typeOf[ConfChainer] ||
@@ -64,8 +66,8 @@ object Figi {
 
     // ugly hack to get the type currently used as a converter, there must be a better way...
     // using intermediate 'val cnf' to ensure that a stable identifier is used to obtain the type (no idea why does it break a times)
-    val converterType = c.typeCheck(q"{ val cnf = $conf; ???.asInstanceOf[cnf.confTypeClass.CC[Nothing]] }").tpe
-    def hasImplicitConverter(tpe: Type): Boolean = hasImplicitValue(converterType, tpe)
+    def converterType(tpe: Type) = c.typeCheck(q"{ val cnf = $conf; ???.asInstanceOf[cnf.confTypeClass.CC[$tpe]] }").tpe
+    def hasImplicitConverter(tpe: Type): Boolean = hasImplicitValue(converterType(tpe))
 
     def abort(msg: String) = c.abort(c.enclosingPosition, msg)
 
@@ -81,7 +83,7 @@ object Figi {
     } yield {
       val (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), hasImplicitConverter(t))
       //TODO this error should be emitted after checking for too many arguments, as it may be irrelevant in that case
-      if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${q"${applyType(converterType, t).normalize}"} found to convert the result of method $name")
+      if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${q"${converterType(t).normalize}"} found to convert the result of method $name")
       val confName = q"$prefix :+ $name"
       val getter: Tree =
         // creating chaining invocation
