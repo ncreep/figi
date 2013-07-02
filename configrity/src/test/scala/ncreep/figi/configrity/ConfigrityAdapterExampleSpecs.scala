@@ -24,18 +24,18 @@ class ConfigrityAdapterExampleSpecs extends Specification {
         val pass: Int
         def port(default: Int = 80): Int
         def missing: Int // using a val here will fail fast when generating a setup instance
-        val dev: Flags
-        val prod: Flags
+        val dev: Deploy
+        val prod: Deploy
         def upCaseUser = user.toUpperCase // will not be overridden by the macro
       }
 
-      trait Flags {
+      trait Deploy {
         val log: Boolean
         val root: File
       }
       
-      // tells the compiler that the Flags trait can be chained
-      implicit object flagsIsConfChainer extends IsConfChainer[Flags]
+      // tells the compiler that the Deploy trait should be chained
+      implicit object flagsIsConfChainer extends IsConfChainer[Deploy]
 
       val base = Configuration(Map("user" -> "figi", "pass" -> "1234"))
       val dev = Configuration(Map("log" -> "true", "root" -> "/dev/root/"))
