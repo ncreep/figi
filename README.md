@@ -86,7 +86,7 @@ trait Deploy {
 }
 
 // tells the compiler that the Deploy trait should be chained
-implicit object flagsIsConfChainer extends IsConfChainer[Deploy]
+implicit object deployIsConfChainer extends IsConfChainer[Deploy]
 
 val base = Configuration(Map("user" -> "figi", "pass" -> "1234"))
 val dev = Configuration(Map("log" -> "true", "root" -> "/dev/root/"))
