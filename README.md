@@ -4,7 +4,8 @@ Figi is a small macro based utility for Scala 2.10 that allows you to easily cre
 
 Currently, Figi comes with built-in support for the [Configrity](https://github.com/paradigmatic/Configrity) library.
 
-Figi relies on [Macro Paradise for 2.10](http://docs.scala-lang.org/overviews/macros/paradise.html#macro_paradise_for_210x) for its macro implementation.
+Figi relies on [Macro Paradise for 2.10](http://docs.scala-lang.org/overviews/macros/paradise.html#macro_paradise_for_210x) for its macro implementation. 
+This means that you can use the compiled version of Figi with a standard 2.10.x version of Scala. But to compile it yourself you will have to add Macro Paradise as a dependency (see [build file](https://github.com/ncreep/figi/blob/master/project/Build.scala)).
 
 ## Rationale
 
