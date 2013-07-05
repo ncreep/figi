@@ -7,8 +7,7 @@ object BuildSettings {
     scalaVersion := "2.10.2",
     scalaOrganization := "org.scala-lang",
 	scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature"),
-    resolvers += Resolver.sonatypeRepo("snapshots"),
-	initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
+    resolvers += Resolver.sonatypeRepo("snapshots")
   )
   
   val buildTestSettings = buildSettings ++ Seq(
@@ -39,7 +38,8 @@ object FigiBuild extends Build {
       // NOTE: macros are compiled with macro paradise 2.10
       scalaVersion := "2.10.2-SNAPSHOT",
       scalaOrganization := "org.scala-lang.macro-paradise",
-      libraryDependencies <+= (scalaVersion)("org.scala-lang.macro-paradise" % "scala-reflect" % _)
+      libraryDependencies <+= (scalaVersion)("org.scala-lang.macro-paradise" % "scala-reflect" % _),
+      initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
     )
   )
 
