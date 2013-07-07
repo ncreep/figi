@@ -8,14 +8,14 @@ import ncreep.figi._
 /** Use [[Figi.makeConf]] to produce configuration instances.
  *  
  *  Assuming proper implicits in scope:
- *  ```
+ *  {{{
  *  trait Foo { def a: Int; val b: String }
  *  val config = getConfig ...
  *  val foo: Foo = Figi.makeConf[Foo](config)
  *  
  *  println(foo.a)
  *  println(foo.b)
- *  ```
+ *  }}}
  *  
  *  More examples in [[ncreep.figi.FigiSpecs]]
  */
