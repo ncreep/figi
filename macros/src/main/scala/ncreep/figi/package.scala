@@ -31,14 +31,16 @@ package object figi {
   }
   
   /** Binds configuration values to their corresponding typeclass. 
-   *  Thus avoiding type parameterization on methods the use them. 
+   *  Thus avoiding type parameterization on methods that use them. 
+   *  @tparam C The concrete configuration type being used.
+   *  @tparam CT The typeclass that corresponds to the configuration type.
    */
-  implicit class InstanceWithConf[C, CC <: Conf[C, CC]](val config: C)(implicit val confTypeClass: CC)
+  implicit class InstanceWithConf[C, CT <: Conf[C, CT]](val config: C)(implicit val confTypeClass: CT)
   
   //TODO figure out how to make this global conversion work
 //  import scala.language.implicitConversions
-//  implicit def tooInstanceWithConf[C, CC <: Conf[C, CC]](config: C)(implicit confTypeClass: CC): InstanceWithConf[C, CC] = 
-//    new InstanceWithConf[C, CC](config)
+//  implicit def tooInstanceWithConf[C, CT <: Conf[C, CT]](config: C)(implicit confTypeClass: CT): InstanceWithConf[C, CT] = 
+//    new InstanceWithConf[C, CT](config)
   
   /** A marker trait for configuration types that should chain `Figi.makeConf` invocations. */
   trait ConfChainer

@@ -20,6 +20,9 @@ import ncreep.figi._
  *  More examples in [[ncreep.figi.FigiSpecs]]
  */
 object Figi {
+  trait A {
+    type B
+  }
 
   /** Implements a config trait of the given type. */
   def makeConf[A](cnf: InstanceWithConf[_, _ <: Conf[_, _]]): A = macro Macros.makeConfImpl[A]
@@ -61,11 +64,10 @@ object Figi {
     def hasImplicitValue(tp1: Type, tp2: Type): Boolean = hasImplicitValue(applyType(tp1, tp2))
 
     def isImplicitlyConfChainer(tpe: Type): Boolean =
-      tpe <:< typeOf[ConfChainer] ||
-        hasImplicitValue(typeOf[IsConfChainer[Nothing]], tpe)
+      tpe <:< typeOf[ConfChainer] || hasImplicitValue(typeOf[IsConfChainer[Nothing]], tpe)
 
     // ugly hack to get the type currently used as a converter, there must be a better way...
-    // using intermediate 'val cnf' to ensure that a stable identifier is used to obtain the type (no idea why does it break a times)
+    // using intermediate 'val cnf' to ensure that a stable identifier is used to obtain the type (no idea why it breaks a times)
     def converterType(tpe: Type) = c.typeCheck(q"{ val cnf = $conf; ???.asInstanceOf[cnf.confTypeClass.CC[$tpe]] }").tpe
     def hasImplicitConverter(tpe: Type): Boolean = hasImplicitValue(converterType(tpe))
 
