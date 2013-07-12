@@ -1,6 +1,6 @@
 # Figi 
 
-Figi is a small macro based utility for Scala 2.10 that allows you to easily create simple type safe wrappers for configuration objects.
+Figi is a small macro based utility for Scala 2.10 that allows you to easily create simple type-safe wrappers for configuration objects.
 
 Currently, Figi comes with built-in support for the [Configrity](https://github.com/paradigmatic/Configrity) library.
 
