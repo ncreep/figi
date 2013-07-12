@@ -2,7 +2,6 @@ package ncreep.figi
 
 import org.streum.configrity._
 import converter._
-import util.Try
 
 /** Provides figi adapters for [[org.streum.configrity.Configrity]]. */
 package object configrity {
