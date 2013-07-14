@@ -18,7 +18,7 @@ class ConfigrityAdapterExampleSpecs extends Specification {
       import org.streum.configrity.converter.Extra._
 
       // the traits specifying the settings we need
-      // excepts chained types, all types must have implicit converters in scope
+      // except chained types, all types must have implicit converters in scope
       trait Setup {
         val user: String
         val pass: Int
