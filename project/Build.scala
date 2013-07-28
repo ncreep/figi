@@ -12,8 +12,8 @@ object BuildSettings {
   
   val buildTestSettings = buildSettings ++ Seq(
 	libraryDependencies ++= Seq(
-		"org.specs2" %% "specs2" % "2.1-SNAPSHOT" % "test",
-		"junit" % "junit" % "4.7" % "test"
+		"org.specs2" %% "specs2" % "2.1.1" % "test",
+		"junit" % "junit" % "4.8.1" % "test"
 	),
 	resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
 	                  "releases"  at "http://oss.sonatype.org/content/repositories/releases")
@@ -36,7 +36,7 @@ object FigiBuild extends Build {
     file("macros"),
     settings = buildSettings ++ Seq(
       // NOTE: macros are compiled with macro paradise 2.10
-      scalaVersion := "2.10.2-SNAPSHOT",
+      scalaVersion := "2.10.3-SNAPSHOT",
       scalaOrganization := "org.scala-lang.macro-paradise",
       libraryDependencies <+= (scalaVersion)("org.scala-lang.macro-paradise" % "scala-reflect" % _),
       initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
