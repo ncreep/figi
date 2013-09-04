@@ -7,7 +7,8 @@ object BuildSettings {
     scalaVersion := "2.10.2",
     scalaOrganization := "org.scala-lang",
 	scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature"),
-    resolvers += Resolver.sonatypeRepo("snapshots")
+    resolvers += Resolver.sonatypeRepo("snapshots"),
+	addCompilerPlugin("org.scala-lang.plugins" % "macro-paradise" % "2.0.0-SNAPSHOT" cross CrossVersion.full)
   )
   
   val buildTestSettings = buildSettings ++ Seq(
@@ -28,17 +29,16 @@ object FigiBuild extends Build {
   lazy val figi: Project = Project(
     "figi",
     file("."),
-    settings = buildSettings
+    settings = buildSettings ++ Seq(
+      run <<= run in Compile in core
+    )
   ) aggregate(macros, core, configrity)
 
   lazy val macros: Project = Project(
     "figi-macros",
     file("macros"),
     settings = buildSettings ++ Seq(
-      // NOTE: macros are compiled with macro paradise 2.10
-      scalaVersion := "2.10.3-SNAPSHOT",
-      scalaOrganization := "org.scala-lang.macro-paradise",
-      libraryDependencies <+= (scalaVersion)("org.scala-lang.macro-paradise" % "scala-reflect" % _),
+      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
     )
   )
