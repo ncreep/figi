@@ -119,7 +119,6 @@ object Figi {
 
     val typeName = newTypeName(tpe.typeSymbol.name.encoded)
     val impl = q"new $typeName {..$impls}"
-    //    println(impl) //TODO remove
     val res = c.Expr(impl)
   }
 }
