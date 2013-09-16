@@ -42,7 +42,7 @@ object Figi {
     }
   }
 
-  private abstract class Helper[C <: Context](val c: C) extends QuasiquoteCompat { helper =>
+  private abstract class Helper[C <: Context](val c: C) { helper =>
     def tpe: c.Type // The type of the trait being implemented
     def conf: c.Expr[InstanceWithConf[_, _ <: Conf[_, _]]]
     def prefix: c.Expr[ConfNames]
