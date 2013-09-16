@@ -67,7 +67,7 @@ object Figi {
       tpe <:< typeOf[ConfChainer] || hasImplicitValue(typeOf[IsConfChainer[Nothing]], tpe)
 
     // ugly hack to get the type currently used as a converter, there must be a better way...
-    // using intermediate 'val cnf' to ensure that a stable identifier is used to obtain the type (no idea why it breaks a times)
+    // using intermediate 'val cnf' to ensure that a stable identifier is used to obtain the type (no idea why it breaks at times)
     def converterType(tpe: Type) = c.typeCheck(q"{ val cnf = $conf; ???.asInstanceOf[cnf.confTypeClass.CC[$tpe]] }").tpe
     def hasImplicitConverter(tpe: Type): Boolean = hasImplicitValue(converterType(tpe))
 
@@ -116,7 +116,6 @@ object Figi {
         }
       }
     }
-
     val typeName = newTypeName(tpe.typeSymbol.name.encoded)
     val impl = q"new $typeName {..$impls}"
     val res = c.Expr(impl)
