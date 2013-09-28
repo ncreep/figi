@@ -20,10 +20,6 @@ import ncreep.figi._
  *  More examples in [[ncreep.figi.FigiSpecs]]
  */
 object Figi {
-  trait A {
-    type B
-  }
-
   /** Implements a config trait of the given type. */
   def makeConf[A](cnf: InstanceWithConf[_, _ <: Conf[_, _]]): A = macro Macros.makeConfImpl[A]
 
