@@ -78,8 +78,8 @@ object Figi {
       name = meth.name.decoded
       termName = newTermName(name)
       t = meth.returnType.asInstanceOf[Type]
+      (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), hasImplicitConverter(t))
     } yield {
-      val (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), hasImplicitConverter(t))
       //TODO this error should be emitted after checking for too many arguments, as it may be irrelevant in that case
       if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${q"${converterType(t).normalize}"} found to convert the result of method $name")
       val confName = q"$prefix :+ $name"
