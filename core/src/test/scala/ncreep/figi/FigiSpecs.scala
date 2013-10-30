@@ -86,7 +86,13 @@ class FigiSpecs extends Specification {
     
     "do nothing when no abstract methods are present" in {
       trait Foo { def a = 5 }
-       makeConf[Foo](cnf).a mustEqual 5
+      makeConf[Foo](cnf).a mustEqual 5
+    }
+    
+    "not fail compilation for empty traits" in {
+      trait Foo {}
+      val foo = makeConf[Foo](cnf) 
+      foo mustEqual foo // just to make test typecheck
     }
     
     "fail fast on missing val members" in {

@@ -112,8 +112,10 @@ object Figi {
         }
       }
     }
+    val a = for { x <- 0 to -1} yield x; trait Foo; q"new Foo {..$a}"
     val typeName = newTypeName(tpe.typeSymbol.name.encoded)
-    val impl = q"new $typeName {..$impls}"
+    // for some reason the quasiquote does not handle the empty case making: new typeName ()
+    val impl = if (impls.isEmpty) q"new $typeName {}" else q"new $typeName {..$impls}"
     val res = c.Expr(impl)
   }
 }
