@@ -4,7 +4,7 @@ import Keys._
 object BuildSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
 	version := "0.1",
-    scalaVersion := "2.10.3-RC2",
+    scalaVersion := "2.10.3",
     scalaOrganization := "org.scala-lang",
 	scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
