@@ -88,11 +88,12 @@ class FigiSpecs extends Specification {
       trait Foo { def a = 5 }
       makeConf[Foo](cnf).a mustEqual 5
     }
-    
+
     "not fail compilation for empty traits" in {
       trait Foo {}
-      val foo = makeConf[Foo](cnf) 
-      foo mustEqual foo // just to make test typecheck
+      val foo = makeConf[Foo](cnf)
+
+      success
     }
     
     "fail fast on missing val members" in {
@@ -131,6 +132,10 @@ class FigiSpecs extends Specification {
       foo.a.d.k(15) mustEqual 15
       foo.a.d.h("bar") mustEqual "6"
     }
+    
+//    "arst" in {
+//      shapeless.test.
+//    }
 
   }
 
