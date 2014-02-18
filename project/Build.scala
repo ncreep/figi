@@ -14,7 +14,8 @@ object BuildSettings {
   val buildTestSettings = buildSettings ++ Seq(
 	libraryDependencies ++= Seq(
 		"org.specs2" %% "specs2" % "2.1.1" % "test",
-		"junit" % "junit" % "4.8.1" % "test"
+		"junit" % "junit" % "4.8.1" % "test",
+		"com.chuusai" % "shapeless" % "2.0.0-M1" cross CrossVersion.full
 	),
 	resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
 	                  "releases"  at "http://oss.sonatype.org/content/repositories/releases")
