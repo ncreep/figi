@@ -45,7 +45,7 @@ And we can continue using our `Setup` instance as usual.
 ## Features
 - Provide your own custom configuration traits, requires no dependencies on Figi
 - Code generation for `val`s and `def`s
-- Code generation ignores any non abstract methods
+- Code generation ignores any non abstract members
 - Default values for missing keys
 - Chaining configuration traits (see example)
 - Easily extend support for your favorite configuration library using the typeclass pattern (example [here](https://github.com/ncreep/figi/blob/master/configrity/src/main/scala/ncreep/figi/configrity/package.scala))
