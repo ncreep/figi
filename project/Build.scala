@@ -8,8 +8,6 @@ object BuildSettings {
     scalaOrganization := "org.scala-lang",
 	scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature"),
 	resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
-//,
-//	addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0-M3" cross CrossVersion.full)
 )
   
   val buildTestSettings = buildSettings ++ Seq(
@@ -39,7 +37,6 @@ object FigiBuild extends Build {
     file("macros"),
     settings = buildSettings ++ Seq(
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
-	  // libraryDependencies += "org.scalamacros" % "quasiquotes" % "2.0.0-M3" cross CrossVersion.full,
       initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
     )
   )
