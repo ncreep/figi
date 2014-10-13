@@ -84,7 +84,7 @@ class FigiSpecs extends Specification {
       }
     }
 
-    "do nothing when no abstract methods are present" in {
+    "do nothing when no abstract members are present" in {
       trait Foo { def a = 5 }
       makeConf[Foo](cnf).a mustEqual 5
     }
@@ -107,7 +107,7 @@ class FigiSpecs extends Specification {
       foo.abc must throwA[NoSuchElementException]
     }
 
-    "ignore non abstract methods" in {
+    "ignore non abstract members" in {
       trait Foo { def a(): String; val b = 15; def c = "f" }
       val foo = makeConf[Foo](cnf)
       foo.a mustEqual "1"
