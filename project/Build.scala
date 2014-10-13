@@ -4,21 +4,20 @@ import Keys._
 object BuildSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
 	version := "0.1",
-    scalaVersion := "2.10.3",
+    scalaVersion := "2.11.2",
     scalaOrganization := "org.scala-lang",
 	scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature"),
-    resolvers += Resolver.sonatypeRepo("releases"),
-	addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0-M3" cross CrossVersion.full)
+	resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
+//,
+//	addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0-M3" cross CrossVersion.full)
 )
   
   val buildTestSettings = buildSettings ++ Seq(
 	libraryDependencies ++= Seq(
-		"org.specs2" %% "specs2" % "2.1.1" % "test",
-		"junit" % "junit" % "4.8.1" % "test",
-		"com.chuusai" % "shapeless" % "2.0.0-M1" cross CrossVersion.full
-	),
-	resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
-	                  "releases"  at "http://oss.sonatype.org/content/repositories/releases")
+		"org.specs2" %% "specs2" % "2.4.6" % "test",
+		"junit" % "junit" % "4.11",
+		"com.chuusai" %% "shapeless" % "2.0.0"
+	)
 // Doesn't seem to work with macros
 //		scalacOptions in Test ++= Seq("-Yrangepos"),
   )
@@ -40,7 +39,7 @@ object FigiBuild extends Build {
     file("macros"),
     settings = buildSettings ++ Seq(
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
-	  libraryDependencies += "org.scalamacros" % "quasiquotes" % "2.0.0-M3" cross CrossVersion.full,
+	  // libraryDependencies += "org.scalamacros" % "quasiquotes" % "2.0.0-M3" cross CrossVersion.full,
       initialCommands in console := """import scala.reflect.runtime.universe._;import ncreep.figi.Figi._;import ncreep.figi._;""".stripMargin
     )
   )
@@ -56,7 +55,7 @@ object FigiBuild extends Build {
     file("configrity"),
     settings = buildTestSettings ++ Seq(
 	  libraryDependencies ++= Seq(
-	    "org.streum" %% "configrity-core" % "1.0.0"
+	    "org.streum" %% "configrity-core" % "1.0.1"
 	  )
 	)
   ) dependsOn(core)
