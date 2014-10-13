@@ -1,7 +1,7 @@
 package ncreep.figi
 
 import language.experimental.macros
-import reflect.macros.Context
+import reflect.macros.blackbox.Context
 import reflect.api._
 import ncreep.figi._
 
@@ -50,7 +50,7 @@ object Figi {
      */
     def applyType(tp1: Type, tp2: Type): Type = {
       // must be a cleaner way to apply a type
-      val appliedType = tp1 match { case TypeRef(p, s, _) => TypeRef(p, s, List(tp2)) }
+      val appliedType = tp1 match { case TypeRef(p, s, _) => internal.typeRef(p, s, List(tp2)) }
       appliedType
     }
 
@@ -64,7 +64,7 @@ object Figi {
 
     // ugly hack to get the type currently used as a converter, there must be a better way...
     // using intermediate 'val cnf' to ensure that a stable identifier is used to obtain the type (no idea why it breaks at times)
-    def converterType(tpe: Type) = c.typeCheck(q"{ val cnf = $conf; ???.asInstanceOf[cnf.confTypeClass.CC[$tpe]] }").tpe
+    def converterType(tpe: Type) = c.typecheck(q"{ val cnf = $conf; ???.asInstanceOf[cnf.confTypeClass.CC[$tpe]] }").tpe
     def hasImplicitConverter(tpe: Type): Boolean = hasImplicitValue(converterType(tpe))
 
     def abort(msg: String) = c.abort(c.enclosingPosition, msg)
@@ -76,12 +76,12 @@ object Figi {
       meth = mem.asInstanceOf[reflect.internal.Symbols$MethodSymbol]
       if meth.isDeferred
       name = meth.name.decoded
-      termName = newTermName(name)
+      termName = TermName(name)
       t = meth.returnType.asInstanceOf[Type]
       (isConfChainer, hasConverter) = (isImplicitlyConfChainer(t), hasImplicitConverter(t))
     } yield {
       //TODO this error should be emitted after checking for too many arguments, as it may be irrelevant in that case
-      if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${q"${converterType(t).normalize}"} found to convert the result of method $name")
+      if (!isConfChainer && !hasConverter) abort(s"No implicit instance of ${q"${converterType(t).dealias}"} found to convert the result of method $name")
       val confName = q"$prefix :+ $name"
       val getter: Tree =
         // creating chaining invocation
@@ -103,7 +103,7 @@ object Figi {
           case MethodType(Nil, _) => nullaryDef
           case MethodType(arg :: Nil, _) => {
             val argType = arg.typeSignature
-            val argName = newTermName("arg")
+            val argName = TermName("arg")
             if (argType weak_<:< t)
               q"def $termName($argName: ${arg.typeSignature}) = $conf.confTypeClass.getWithDefault[$t]($conf.config, $confName, $argName)"
             else abort(s"Type mismatch in default configuration argument for method $name, $argType does not (weakly) conform to $t")
@@ -113,7 +113,7 @@ object Figi {
       }
     }
     val a = for { x <- 0 to -1} yield x; trait Foo; q"new Foo {..$a}"
-    val typeName = newTypeName(tpe.typeSymbol.name.encoded)
+    val typeName = TypeName(tpe.typeSymbol.name.encodedName.toString)
     // for some reason the quasiquote does not handle the empty case making: new typeName ()
     val impl = if (impls.isEmpty) q"new $typeName {}" else q"new $typeName {..$impls}"
     val res = c.Expr(impl)
