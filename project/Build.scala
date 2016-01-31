@@ -2,12 +2,15 @@ import sbt._
 import Keys._
 
 object BuildSettings {
-  val buildSettings = Defaults.defaultSettings ++ Seq(
+  val buildSettings = Defaults.defaultSettings ++ bintray.Plugin.bintrayPublishSettings ++ Seq(
+    organization := "ncreep",
 	version := "0.1",
-    scalaVersion := "2.11.2",
+    scalaVersion := "2.11.7",
     scalaOrganization := "org.scala-lang",
 	scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature"),
-	resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
+	resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo),
+    licenses += ("BSD Simplified", url("https://opensource.org/licenses/BSD-2-Clause")),
+    bintray.Keys.bintrayOrganization in bintray.Keys.bintray := Some("ncreep")
 )
   
   val buildTestSettings = buildSettings ++ Seq(
