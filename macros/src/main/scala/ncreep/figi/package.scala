@@ -39,7 +39,7 @@ package object figi {
   
   //TODO figure out how to make this global conversion work
 //  import scala.language.implicitConversions
-//  implicit def tooInstanceWithConf[C, CT <: Conf[C, CT]](config: C)(implicit confTypeClass: CT): InstanceWithConf[C, CT] = 
+//  implicit def toInstanceWithConf[C, CT <: Conf[C, CT]](config: C)(implicit confTypeClass: CT): InstanceWithConf[C, CT] = 
 //    new InstanceWithConf[C, CT](config)
   
   /** A marker trait for configuration types that should chain `Figi.makeConf` invocations. */
